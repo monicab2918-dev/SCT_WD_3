@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tic-Tac-Toe Game</title>
+<style>
+*{box-sizing:border-box;font-family:'Poppins',sans-serif;margin:0;padding:0;}
+body{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;overflow-x:hidden;
+  background:linear-gradient(270deg,#ff9a9e,#fad0c4,#fbc2eb,#a6c1ee,#84fab0,#8fd3f4);
+  background-size:1800% 1800%;animation:bgFlow 18s ease infinite;
+}
+@keyframes bgFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+h1{color:#fff;text-shadow:2px 2px 8px #00000077;margin-bottom:12px;letter-spacing:1px;}
+.controls{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;margin-bottom:15px;}
+.btn{
+  border:none;border-radius:14px;padding:10px 18px;font-weight:700;font-size:15px;cursor:pointer;
+  transition:0.25s;background:linear-gradient(90deg,#ffcf71,#ff9a9e);color:#333;
+  box-shadow:0 4px 0 rgba(0,0,0,0.15);
+}
+.btn.secondary{background:linear-gradient(90deg,#8ec5fc,#e0c3fc);color:#fff;}
+.btn:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 8px 18px rgba(0,0,0,0.2);}
+.btn.active{
+  background:linear-gradient(90deg,#6dfc86,#15b16a);color:#fff;
+  box-shadow:0 0 20px rgba(21,177,106,0.6);transform:scale(1.05);border:2px solid #fff;
+}
+.mode-status{color:#fff;margin-bottom:10px;text-shadow:1px 1px 4px #000;}
+.board{
+  display:grid;grid-template-columns:repeat(3,100px);grid-template-rows:repeat(3,100px);
+  gap:10px;border-radius:16px;background:linear-gradient(135deg,#ffecd2,#fcb69f,#a1c4fd,#c2e9fb);
+  background-size:300% 300%;animation:flow 12s ease infinite;padding:12px;
+  box-shadow:0 0 25px rgba(0,0,0,0.25);
+}
+@keyframes flow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.cell{
+  background:rgba(255,255,255,0.85);border-radius:14px;display:flex;align-items:center;justify-content:center;
+  font-size:2.5rem;cursor:pointer;font-weight:900;box-shadow:inset 0 0 8px rgba(0,0,0,0.1);
+  transition:transform 0.25s, background 0.3s;
+}
+.cell:hover{transform:scale(1.05);background:rgba(255,255,255,1);}
+.x{color:#ff3b3b;text-shadow:2px 2px 8px #ff8080;}
+.o{color:#1e90ff;text-shadow:2px 2px 8px #8ec5fc;}
+.cell.winning{
+  animation:flashGreen 1s ease-in-out infinite alternate;
+}
+@keyframes flashGreen{
+  from{background:#d1ffd1;transform:scale(1);}
+  to{background:#76ff76;transform:scale(1.05);}
+}
+.scoreboard{
+  margin-top:20px;background:rgba(255,255,255,0.2);border-radius:14px;
+  padding:10px 20px;display:flex;justify-content:center;gap:25px;
+  color:#fff;font-weight:600;text-shadow:1px 1px 5px #00000088;
+}
+.history{
+  margin-top:20px;width:300px;max-height:150px;overflow-y:auto;
+  background:rgba(255,255,255,0.25);border-radius:14px;padding:10px;
+  color:#fff;text-shadow:1px 1px 3px #000;
+}
+.popup{
+  position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);
+  display:none;align-items:center;justify-content:center;z-index:10;
+}
+.popup-content{
+  background:#fff9c4;border-radius:20px;padding:30px 40px;text-align:center;
+  animation:bounceIn 0.6s ease;box-shadow:0 0 20px rgba(0,0,0,0.3);
+}
+@keyframes bounceIn{0%{transform:scale(0.6);opacity:0;}60%{transform:scale(1.1);opacity:1;}100%{transform:scale(1);}}
+.popup h2{color:#15b16a;margin-bottom:15px;font-size:1.5rem;}
+.popup button{
+  margin:8px;padding:8px 14px;border:none;border-radius:12px;cursor:pointer;
+  background:linear-gradient(90deg,#a1ffce,#faffd1);font-weight:700;transition:0.3s;
+}
+.popup button:hover{transform:scale(1.05);}
+</style>
+</head>
+<body>
+<h1>🎲 Tic-Tac-Toe Game 🎯</h1>
+
+<div class="controls">
+  <button class="btn" id="twoBtn">👥 2 Players</button>
+  <button class="btn secondary" id="compBtn">💻 Vs Computer</button>
+</div>
+<div class="controls" id="choose" style="display:none;">
+  <button class="btn" id="easyBtn">Easy</button>
+  <button class="btn" id="hardBtn">Smart</button>
+</div>
+<div class="mode-status">Mode: <span id="modeText">Select</span></div>
+
+<div class="board" id="board"></div>
+
+<div class="scoreboard">
+  <div>Player Wins: <span id="playerScore">0</span></div>
+  <div>Computer Wins: <span id="computerScore">0</span></div>
+  <div>Ties: <span id="tieScore">0</span></div>
+</div>
+
+<div class="history" id="history">
+  <strong>🎮 Game History:</strong><br>
+</div>
+
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h2 id="resultText">You Win!</h2>
+    <button id="playAgain">Play Again</button>
+    <button id="changeMode">Change Mode</button>
+    <button id="saveGame">💾 Save Result</button>
+  </div>
+</div>
+
+<script>
+const board=document.getElementById("board");
+const popup=document.getElementById("popup");
+const resultText=document.getElementById("resultText");
+const playAgain=document.getElementById("playAgain");
+const changeMode=document.getElementById("changeMode");
+const saveGame=document.getElementById("saveGame");
+const playerScore=document.getElementById("playerScore");
+const computerScore=document.getElementById("computerScore");
+const tieScore=document.getElementById("tieScore");
+const modeText=document.getElementById("modeText");
+const history=document.getElementById("history");
+
+const twoBtn=document.getElementById("twoBtn");
+const compBtn=document.getElementById("compBtn");
+const choose=document.getElementById("choose");
+const easyBtn=document.getElementById("easyBtn");
+const hardBtn=document.getElementById("hardBtn");
+
+let cells=[];
+let gameState=Array(9).fill("");
+let currentPlayer='X';
+let vsComputer=false;
+let difficulty='easy';
+let activeGame=false;
+let scores={player:0,computer:0,tie:0};
+let historyData=[]; // 🧠 Tracks all games
+
+// ✅ Build board
+function buildBoard(){
+  board.innerHTML="";
+  cells=[];
+  for(let i=0;i<9;i++){
+    const c=document.createElement("div");
+    c.classList.add("cell");
+    c.dataset.index=i;
+    c.addEventListener("click",()=>handleMove(i));
+    board.appendChild(c);
+    cells.push(c);
+  }
+}
+
+// ✅ Handle player or computer move
+function handleMove(i){
+  if(!activeGame||gameState[i]!=="")return;
+  gameState[i]=currentPlayer;
+  cells[i].textContent=currentPlayer;
+  cells[i].classList.add(currentPlayer==='X'?'x':'o');
+
+  const winCells=checkWin(gameState,currentPlayer);
+  if(winCells){
+    highlightWinningCells(winCells);
+    endGame(currentPlayer==='X'?'Player X Wins!':'Player O Wins!');
+    if(vsComputer&&currentPlayer==='O')scores.computer++;
+    else if(vsComputer&&currentPlayer==='X')scores.player++;
+    else scores.player++;
+    updateScores();return;
+  }
+
+  if(gameState.every(c=>c!=="")){
+    endGame("It's a Draw!");scores.tie++;updateScores();return;
+  }
+
+  currentPlayer=currentPlayer==='X'?'O':'X';
+  if(vsComputer&&currentPlayer==='O') setTimeout(computerMove,400);
+}
+
+// ✅ Flash green for winning cells
+function highlightWinningCells(cellsIndex){
+  cellsIndex.forEach(i=>cells[i].classList.add("winning"));
+}
+
+// ✅ Check win condition properly
+function checkWin(state,player){
+  const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const pattern of wins){
+    const [a,b,c]=pattern;
+    if(state[a]===player&&state[b]===player&&state[c]===player)return pattern;
+  }
+  return null;
+}
+
+// ✅ Computer (AI) moves
+function computerMove(){
+  let index;
+  if(difficulty==='easy'){
+    const avail=gameState.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+    index=avail[Math.floor(Math.random()*avail.length)];
+  }else{
+    index=findBestMove();
+  }
+  gameState[index]='O';
+  cells[index].textContent='O';
+  cells[index].classList.add('o');
+  const winCells=checkWin(gameState,'O');
+  if(winCells){
+    highlightWinningCells(winCells);
+    endGame("Computer Wins!");
+    scores.computer++;updateScores();return;
+  }
+  if(gameState.every(c=>c!=="")){
+    endGame("It's a Draw!");scores.tie++;updateScores();return;
+  }
+  currentPlayer='X';
+}
+
+// ✅ Minimax for Smart AI
+function minimax(state,depth,isMax){
+  if(checkWin(state,'O'))return 10-depth;
+  if(checkWin(state,'X'))return depth-10;
+  if(state.every(c=>c!==""))return 0;
+  if(isMax){
+    let best=-Infinity;
+    for(let i=0;i<9;i++){
+      if(state[i]===""){state[i]='O';best=Math.max(best,minimax(state,depth+1,false));state[i]="";}
+    }
+    return best;
+  }else{
+    let best=Infinity;
+    for(let i=0;i<9;i++){
+      if(state[i]===""){state[i]='X';best=Math.min(best,minimax(state,depth+1,true));state[i]="";}
+    }
+    return best;
+  }
+}
+function findBestMove(){
+  let best=-Infinity,move;
+  for(let i=0;i<9;i++){
+    if(gameState[i]===""){gameState[i]='O';
+      let score=minimax(gameState,0,false);
+      gameState[i]="";
+      if(score>best){best=score;move=i;}
+    }
+  }
+  return move;
+}
+
+// ✅ End game popup
+function endGame(msg){
+  activeGame=false;
+  resultText.textContent=msg;
+  resultText.style.color=msg.includes("Wins")?"#15b16a":"#333";
+  popup.style.display="flex";
+}
+
+// ✅ Save result
+saveGame.onclick=()=>{
+  const time=new Date().toLocaleTimeString();
+  historyData.push({mode:modeText.textContent,result:resultText.textContent,time});
+  updateHistory();
+  popup.style.display='none';
+  activateGame();
+};
+
+// ✅ History display
+function updateHistory(){
+  history.innerHTML="<strong>🎮 Game History:</strong><br>";
+  historyData.slice(-10).forEach((h,i)=>{
+    history.innerHTML+=`${i+1}. [${h.mode}] → ${h.result} (${h.time})<br>`;
+  });
+}
+
+// ✅ Scores update
+function updateScores(){
+  playerScore.textContent=scores.player;
+  computerScore.textContent=scores.computer;
+  tieScore.textContent=scores.tie;
+}
+
+// ✅ Activate game
+function activateGame(){
+  buildBoard();
+  gameState.fill("");
+  currentPlayer='X';
+  activeGame=true;
+}
+
+// ✅ Buttons
+playAgain.onclick=()=>{popup.style.display='none';activateGame();}
+changeMode.onclick=()=>{popup.style.display='none';choose.style.display='none';activeGame=false;modeText.textContent='Select';twoBtn.classList.remove('active');compBtn.classList.remove('active');}
+twoBtn.onclick=()=>{vsComputer=false;difficulty='easy';modeText.textContent='2 Players';twoBtn.classList.add('active');compBtn.classList.remove('active');activateGame();}
+compBtn.onclick=()=>{twoBtn.classList.remove('active');compBtn.classList.add('active');choose.style.display='flex';}
+easyBtn.onclick=()=>{difficulty='easy';vsComputer=true;modeText.textContent='Vs Computer (Easy)';choose.style.display='none';activateGame();}
+hardBtn.onclick=()=>{difficulty='smart';vsComputer=true;modeText.textContent='Vs Computer (Smart)';choose.style.display='none';activateGame();}
+</script>
+</body>
+</html>
