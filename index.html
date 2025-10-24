@@ -138,7 +138,7 @@ let activeGame=false;
 let scores={player:0,computer:0,tie:0};
 let historyData=[]; // 🧠 Tracks all games
 
-// ✅ Build board
+
 function buildBoard(){
   board.innerHTML="";
   cells=[];
@@ -152,7 +152,7 @@ function buildBoard(){
   }
 }
 
-// ✅ Handle player or computer move
+
 function handleMove(i){
   if(!activeGame||gameState[i]!=="")return;
   gameState[i]=currentPlayer;
@@ -177,12 +177,12 @@ function handleMove(i){
   if(vsComputer&&currentPlayer==='O') setTimeout(computerMove,400);
 }
 
-// ✅ Flash green for winning cells
+
 function highlightWinningCells(cellsIndex){
   cellsIndex.forEach(i=>cells[i].classList.add("winning"));
 }
 
-// ✅ Check win condition properly
+
 function checkWin(state,player){
   const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
   for(const pattern of wins){
@@ -192,7 +192,7 @@ function checkWin(state,player){
   return null;
 }
 
-// ✅ Computer (AI) moves
+
 function computerMove(){
   let index;
   if(difficulty==='easy'){
@@ -216,7 +216,7 @@ function computerMove(){
   currentPlayer='X';
 }
 
-// ✅ Minimax for Smart AI
+
 function minimax(state,depth,isMax){
   if(checkWin(state,'O'))return 10-depth;
   if(checkWin(state,'X'))return depth-10;
@@ -247,7 +247,7 @@ function findBestMove(){
   return move;
 }
 
-// ✅ End game popup
+
 function endGame(msg){
   activeGame=false;
   resultText.textContent=msg;
@@ -255,7 +255,7 @@ function endGame(msg){
   popup.style.display="flex";
 }
 
-// ✅ Save result
+
 saveGame.onclick=()=>{
   const time=new Date().toLocaleTimeString();
   historyData.push({mode:modeText.textContent,result:resultText.textContent,time});
@@ -264,7 +264,7 @@ saveGame.onclick=()=>{
   activateGame();
 };
 
-// ✅ History display
+
 function updateHistory(){
   history.innerHTML="<strong>🎮 Game History:</strong><br>";
   historyData.slice(-10).forEach((h,i)=>{
@@ -272,14 +272,14 @@ function updateHistory(){
   });
 }
 
-// ✅ Scores update
+
 function updateScores(){
   playerScore.textContent=scores.player;
   computerScore.textContent=scores.computer;
   tieScore.textContent=scores.tie;
 }
 
-// ✅ Activate game
+
 function activateGame(){
   buildBoard();
   gameState.fill("");
@@ -287,7 +287,7 @@ function activateGame(){
   activeGame=true;
 }
 
-// ✅ Buttons
+
 playAgain.onclick=()=>{popup.style.display='none';activateGame();}
 changeMode.onclick=()=>{popup.style.display='none';choose.style.display='none';activeGame=false;modeText.textContent='Select';twoBtn.classList.remove('active');compBtn.classList.remove('active');}
 twoBtn.onclick=()=>{vsComputer=false;difficulty='easy';modeText.textContent='2 Players';twoBtn.classList.add('active');compBtn.classList.remove('active');activateGame();}
